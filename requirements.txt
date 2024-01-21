@@ -1,0 +1,7 @@
+elevenlabs
+PyPDF2
+pymupdf
+openai
+ttkbootstrap
+langchain
+langchain-openai
