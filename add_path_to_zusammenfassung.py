@@ -28,14 +28,15 @@ client = OpenAI(
 
 
 def prompt_from_text(obj, filenames):
+    # TODO: make it more efficient for the german language
     return f"""
     Ich gebe dir ein ein Objekt bei dem gibt es die felder Text und Tag. Du musst schauen welcher text in welcher Datei vorkommen kann. Geben nur die Dateien an bei der du dir sicher bist das hier der Text vorkommt.
     hier ist eine liste der Dateien:
     {filenames}
     Hier ist das Objekt:
     {obj}
-    You only give the answer in this format, try that is compilable json format:
-    {{ "thema": "<text>", "tag": "<tag>", "file": [<files>]}}
+    Die Antwort die zurueck gegeben werden soll, soll aus diesem Format erstellt werden, geben nur das ausgefuellte Format zurueck, hier ist der Kontext nicht so wichtig, kannst du alle Objecte nur im json fromat ausgeben und nicht mehr?:
+    [{{ "thema": "<text>", "tag": "<tag>", "file": [<files>]}}, ... ]
     """
 
 
@@ -47,19 +48,29 @@ def chat_gpt(obj, filenames):
                 "content": prompt_from_text(obj, filenames),
             }
         ],
-        model="gpt-3.5-turbo-1106",
+        model="gpt-4-0125-preview",
     )
     return chat_completion
 
 
 json_data = []
-for obj in zusammenfassung:
-    response = chat_gpt(obj, files).choices[0].message.content
-    try:
-        json_obj = json.loads(response)
-        json_data.append(json_obj)
-    except ValueError:
-        print(response)
 
-with open("zusammenfassung_with_files.json", "w") as outfile:
-    json.dump(json_data, outfile)
+
+response = chat_gpt(zusammenfassung, files).choices[0].message.content
+try:
+    json_obj = json.loads(response)
+    print(json_obj)
+    json_data.append(json_obj)
+except ValueError:
+    print(response)
+
+# for obj in zusammenfassung:
+#     response = chat_gpt(obj, files).choices[0].message.content
+#     try:
+#         json_obj = json.loads(response)
+#         json_data.append(json_obj)
+#     except ValueError:
+#         print(response)
+#
+# with open("zusammenfassung_with_files.json", "w") as outfile:
+#     json.dump(json_data, outfile)
